@@ -6,6 +6,10 @@ from data import generate_data
 
 # nessary things needed for the modeltraining
 model = TFTModel()
+checkpoint = torch.load("tft_model.pth", weights_only=False)
+model.load_state_dict(checkpoint["model_state_dict"])
+print("checkpoint loaded successfully")
+
 optimizer = torch.optim.Adam(model.parameters(), lr=0.0002)
 loss_fn = nn.MSELoss()
 
@@ -16,7 +20,7 @@ train_loader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 
 
-for epoch in range(2000):
+for epoch in range(1000):
     total_loss = 0
 
     for x_seq, day, menu, target in train_loader:
@@ -32,6 +36,13 @@ for epoch in range(2000):
         total_loss += loss.item()
 
     print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
+
+
+torch.save({
+    "model_state_dict": model.state_dict(),
+    "mean": dataset.mean,
+    "std": dataset.std
+}, "tft_model.pth")
 
 
 # from hear  its in inference mod
