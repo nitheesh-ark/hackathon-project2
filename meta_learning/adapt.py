@@ -1,7 +1,7 @@
 import torch
 from model import MetaSurplusModel
 
-def adapt_model(base_model, x_new, y_new, steps=5, lr=0.001):
+def adapt_model(base_model, x_new, y_new, steps=1, lr=0.001):
     model = MetaSurplusModel()
     model.load_state_dict(base_model.state_dict())
 
