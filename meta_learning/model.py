@@ -10,7 +10,7 @@ class MetaSurplusModel(nn.Module):
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(32, 1)
+            nn.Linear(32, 4)  
         )
 
     def forward(self, x):
