@@ -1,5 +1,5 @@
 import torch
-from model import MetaSurplusModel
+from model import FoodPrepModel
 
 menu_map = {
     0: ["Pasta Alfredo", "Spaghetti Bolognese", "Margherita Pizza", "Garlic Bread"],
@@ -8,17 +8,14 @@ menu_map = {
     3: ["Butter Chicken", "Paneer Butter Masala", "Dal Tadka", "Jeera Rice"]
 }
 
-
-model = MetaSurplusModel()
-model.load_state_dict(torch.load("meta_model_v2.pth", map_location="cpu"))
+model = FoodPrepModel()
+model.load_state_dict(torch.load("prep_model.pth", map_location="cpu"))
 model.eval()
 
-
-def predict(footfall, food_prepared, day, menu):
+def predict(footfall, day, menu):
 
     x = torch.tensor([[
         footfall / 1000.0,
-        food_prepared / 1000.0,
         day / 6.0,
         menu / 3.0
     ]], dtype=torch.float32)
@@ -26,16 +23,19 @@ def predict(footfall, food_prepared, day, menu):
     with torch.no_grad():
         pred = model(x)[0].numpy()
 
-
-    pred = pred * 200.0
+    # 🔥 rescale
+    pred = pred * 1000.0
 
     dishes = menu_map[menu]
 
-    print("\nPredicted Surplus:")
+    print("\n🍳 Food to Prepare:")
     for i in range(4):
-        print(f"{dishes[i]} → {pred[i]:.1f} plates")
-
+        print(f"{dishes[i]} → {pred[i]:.0f} plates")
 
 
 if __name__ == "__main__":
-    predict(500, 620, 6, 1)
+    predict(
+        footfall=500,
+        day=6,
+        menu=2
+    )

@@ -3,18 +3,16 @@ import torch.nn as nn
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from model import MetaSurplusModel
+from model import FoodPrepModel
 
-# -------------------------
-# Synthetic Data
-# -------------------------
 np.random.seed(42)
+n = 2000
 
-n = 10000
-
+# -------------------------
+# Inputs
+# -------------------------
 data = pd.DataFrame({
     "footfall_pred": np.random.randint(200, 900, n),
-    "food_prepared": np.random.randint(250, 800, n),
     "day": np.random.randint(0, 7, n),
     "menu": np.random.randint(0, 4, n)
 })
@@ -23,51 +21,56 @@ data = pd.DataFrame({
 # Normalize Inputs
 # -------------------------
 data["footfall_pred"] /= 1000.0
-data["food_prepared"] /= 1000.0
 data["day"] /= 6.0
 data["menu"] /= 3.0
 
 # -------------------------
-# Generate Targets
+# Targets (food to prepare)
 # -------------------------
-
 targets = []
 
 for i in range(n):
-    base = (data["food_prepared"][i] - data["footfall_pred"][i]) * 1000
+    footfall = data["footfall_pred"][i] * 1000
 
     dishes = []
+
     for d in range(4):
-        noise = np.random.normal(0, 2)  # 🔥 reduced noise
+        noise = np.random.normal(0, 3)
 
-        day_factor = 10 if data["day"][i] > 0.7 else 0
-        menu_factor = data["menu"][i] * 5
+        # weekend boost
+        day_factor = 20 if data["day"][i] > 0.7 else 0
 
-        value = base / 4 + noise + day_factor + menu_factor
+        # menu popularity
+        menu_factor = data["menu"][i] * 10
+
+        # distribute footfall across dishes
+        value = (footfall / 4) + day_factor + menu_factor + noise
+
         dishes.append(value)
 
     targets.append(dishes)
-    print(targets[-1])
 
-
+# -------------------------
+# Tensor
+# -------------------------
 X = torch.tensor(data.values, dtype=torch.float32)
 y = torch.tensor(targets, dtype=torch.float32)
 
-
-
-y = y / 200.0
+# 🔥 Normalize target
+y = y / 1000.0
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-#---------------------------------------------------------------------------------------------------------------------------------------------
-
-
-model = MetaSurplusModel()
+# -------------------------
+# Model
+# -------------------------
+model = FoodPrepModel()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 loss_fn = nn.MSELoss()
 
-
-
+# -------------------------
+# Train
+# -------------------------
 for epoch in range(500):
     model.train()
 
@@ -83,8 +86,8 @@ for epoch in range(500):
         print(f"Epoch {epoch} | Loss: {loss.item():.4f}")
 
 # -------------------------
-# Save Model
+# Save
 # -------------------------
-torch.save(model.state_dict(), "meta_model_v2.pth")
+torch.save(model.state_dict(), "prep_model.pth")
 
-print("✅ Model trained and saved as meta_model_v2.pth")
+print("✅ Prep model saved!")
