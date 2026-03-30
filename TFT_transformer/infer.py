@@ -1,5 +1,5 @@
 import torch
-from model import TFTModel
+from .model import TFTModel
 
 def predict(sample, model_path="tft_model.pth"):
     seq, day, menu, _ = sample  

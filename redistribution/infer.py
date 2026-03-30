@@ -1,7 +1,7 @@
 from model import SmartRedistributor
-surplus = 10+80+49
+surplus = 100
 ngos = [
-    {"name": "NGO A", "distance": 2, "capacity": 50, "urgency": 5},
+    {"name": "NGO A", "distance": 2, "capacity": 10, "urgency": 5},
     {"name": "NGO B", "distance": 5, "capacity": 80, "urgency": 3},
     {"name": "NGO C", "distance": 5, "capacity": 10, "urgency": 10}
 ]

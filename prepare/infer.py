@@ -1,5 +1,5 @@
 import torch
-from model import FoodPrepModel
+from .model import FoodPrepModel
 
 menu_map = {
     0: ["Pasta Alfredo", "Spaghetti Bolognese", "Margherita Pizza", "Garlic Bread"],
@@ -8,11 +8,12 @@ menu_map = {
     3: ["Butter Chicken", "Paneer Butter Masala", "Dal Tadka", "Jeera Rice"]
 }
 
-model = FoodPrepModel()
-model.load_state_dict(torch.load("prep_model.pth", map_location="cpu"))
-model.eval()
 
-def predict(footfall, day, menu):
+def predict(footfall, day, menu, model_path = "prep_model.pth"):
+
+    model = FoodPrepModel()
+    model.load_state_dict(torch.load(model_path, map_location="cpu"))
+    model.eval()
 
     x = torch.tensor([[
         footfall / 1000.0,
@@ -26,11 +27,13 @@ def predict(footfall, day, menu):
     # 🔥 rescale
     pred = pred * 1000.0
 
+
     dishes = menu_map[menu]
 
     print("\n🍳 Food to Prepare:")
-    for i in range(4):
-        print(f"{dishes[i]} → {pred[i]:.0f} plates")
+
+    
+    return pred
 
 
 if __name__ == "__main__":
